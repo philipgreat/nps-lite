@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title langtag="title-login">NPS · 登录</title>
+<link href="{{.web_base_url}}/static/css/bootstrap.min.css?v={{.version}}" rel="stylesheet">
+<link href="{{.web_base_url}}/static/css/fontawesome.min.css?v={{.version}}" rel="stylesheet">
+<link href="{{.web_base_url}}/static/css/solid.min.css?v={{.version}}" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:#16243c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.login-shell{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}.brand-panel{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:52px 64px;background:#102643;color:#fff}.brand-panel:after{content:"";position:absolute;width:640px;height:640px;right:-330px;bottom:-330px;border:1px solid #ffffff12;border-radius:50%;box-shadow:0 0 0 80px #ffffff04,0 0 0 160px #ffffff03;pointer-events:none}.brand{display:flex;align-items:center;gap:14px;font-size:25px;font-weight:700;letter-spacing:2px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:#4dd7bb;border-radius:10px;color:#102643;font-size:19px;letter-spacing:0}.brand-content{position:relative;z-index:1;max-width:490px;padding:72px 0}.eyebrow{font-size:12px;letter-spacing:3px;color:#77d9c9;font-weight:600}.brand-content h1{font-size:clamp(36px,3.8vw,60px);font-weight:650;line-height:1.25;letter-spacing:-1.5px;margin:24px 0}.brand-content p{max-width:380px;font-size:17px;line-height:1.9;color:#a9bcd1;margin:0}.network-art{height:110px;display:flex;align-items:center;max-width:330px;margin-top:48px}.node{width:52px;height:52px;display:grid;place-items:center;border:1px solid #52708c;border-radius:14px;background:#1a3552;font-size:20px;color:#a8c3dc}.node.center{border-color:#62d9c0;background:#163f4c;color:#85ead4}.wire{height:1px;flex:1;background:linear-gradient(90deg,#456584,#62d9c0);position:relative}.wire:after{content:"";position:absolute;left:48%;top:-3px;width:7px;height:7px;background:#74dfc8;border-radius:50%}.brand-footer{position:relative;z-index:1;font-size:12px;color:#7990aa;letter-spacing:1px}.form-panel{display:flex;flex-direction:column;min-width:0;padding:36px 56px}.toolbar{display:flex;justify-content:flex-end;min-height:38px}.toolbar .btn{border:1px solid #dce3ed;background:transparent;color:#52627a;border-radius:8px;font-size:12px;padding:8px 12px}.dropdown-menu{right:0;left:auto}.form-area{width:100%;max-width:440px;margin:auto;padding:64px 0}.section-label{font-size:12px;letter-spacing:2px;color:#718197;font-weight:600}.form-area h2{font-size:36px;font-weight:650;letter-spacing:-1px;margin:14px 0 12px}.intro{font-size:15px;color:#78869a;margin:0 0 40px;line-height:1.7}.field{margin-bottom:24px}.field label{display:block;margin-bottom:10px;font-size:14px;font-weight:600;color:#35465e}.field .form-control{height:60px;padding:16px 18px;border:1px solid #d8e1ec;border-radius:10px;font-size:17px;background:#fff;color:#182941;box-shadow:0 2px 4px #122b4603;transition:border-color .15s,box-shadow .15s}.field .form-control::placeholder{color:#a1adbd;font-size:15px}.field .form-control:focus{border-color:#228e7b;outline:0;box-shadow:0 0 0 4px #228e7b14}.login-button{display:block;width:100%;min-height:60px;border:0;border-radius:10px;background:#173e61;color:white;font-size:17px;font-weight:600;margin-top:8px;cursor:pointer;transition:background .15s}.login-button:hover{background:#20547f}.login-button:focus-visible{outline:3px solid #228e7b;outline-offset:3px}.login-button:disabled{opacity:.65;cursor:wait}.form-footer{font-size:12px;color:#97a3b4;text-align:center;padding:24px 0 0}.login-error{color:#b93e3e;background:#fff0ef;border:1px solid #f3d4d0;border-radius:8px;padding:12px 16px;margin:0 0 20px;font-size:14px}.login-error:empty{display:none}.register{margin-top:24px;text-align:center}.captcha-field img{max-width:100%;margin-bottom:12px}@media(min-width:1500px){.brand-panel{padding:64px 88px}.form-panel{padding:44px 80px}}@media(max-width:900px){.brand-panel{padding:36px}.form-panel{padding:28px}.brand-content h1{font-size:38px}}@media(max-width:680px){.login-shell{grid-template-columns:1fr}.brand-panel{padding:26px 28px}.brand-content{padding:30px 0 10px}.brand-content h1{font-size:34px;margin:14px 0}.brand-content p{font-size:14px}.network-art,.brand-footer{display:none}.form-panel{padding:22px 28px}.form-area{padding:30px 0 40px}.form-area h2{font-size:30px}.intro{margin-bottom:28px}.form-footer{padding-bottom:16px}}
+</style>
+<script>window.nps={"web_base_url":{{.web_base_url}},"version":"{{.version}}"};</script>
+<script src="{{.web_base_url}}/static/js/jquery-3.4.1.min.js?v={{.version}}"></script>
+<script src="{{.web_base_url}}/static/js/bootstrap.min.js?v={{.version}}"></script>
+<script src="{{.web_base_url}}/static/js/language.js?v={{.version}}"></script>
+</head>
+<body>
+<main class="login-shell">
+<section class="brand-panel" aria-label="NPS">
+<div class="brand"><span class="brand-mark" aria-hidden="true">↗</span>NPS</div>
+<div class="brand-content"><div class="eyebrow">NETWORK · PROXY · SERVICE</div><h1>连接每一个节点<br>让服务触手可及</h1><p>在一个控制台中，管理客户端、隧道与远程服务，让网络连接清晰有序。</p><div class="network-art" aria-hidden="true"><div class="node">⌘</div><div class="wire"></div><div class="node center">↗</div><div class="wire"></div><div class="node">⌘</div></div></div>
+<div class="brand-footer">NPS / NETWORK CONTROL CENTER</div>
+</section>
+<section class="form-panel" aria-labelledby="login-heading">
+<div class="toolbar"><div class="dropdown"><button id="languagemenu" class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Language"><i class="fa fa-globe-asia" aria-hidden="true"></i><span></span></button><ul class="dropdown-menu"></ul></div></div>
+<div class="form-area"><div class="section-label">MANAGEMENT CONSOLE</div><h2 id="login-heading">欢迎回来</h2><p class="intro">登录 NPS 控制台，管理你的网络与服务。</p>
+<form id="login-form">
+<div id="login-error" class="login-error" role="alert" aria-live="polite"></div>
+<div class="field"><label for="username" langtag="word-username">用户名</label><input id="username" name="username" class="form-control" placeholder="请输入用户名" langtag="word-username" autocomplete="username" required></div>
+<div class="field"><label for="password" langtag="word-password">密码</label><input id="password" name="password" type="password" class="form-control" placeholder="请输入密码" langtag="word-password" autocomplete="current-password" required></div>
+{{if eq true .captcha_open}}<div class="field captcha-field"><label for="captcha" langtag="word-captcha">验证码</label>{{create_captcha}}<input id="captcha" name="captcha" class="form-control" placeholder="验证码" langtag="word-captcha" autocomplete="off" required></div>{{end}}
+<button id="login-button" type="submit" class="login-button" langtag="word-login">登录</button>
+{{if eq true .register_allow}}<div class="register"><span langtag="info-noaccount"></span> <a href="{{.web_base_url}}/login/register" langtag="word-register">注册</a></div>{{end}}
+</form></div>
+<footer class="form-footer">NPS &nbsp;·&nbsp; v{{.version}}</footer>
+</section></main>
+<script>
+$("#login-form").on("submit",function(event){
+ event.preventDefault();
+ var button=$("#login-button");
+ if(button.prop("disabled"))return;
+ $("#login-error").text("");button.prop("disabled",true);
+ $.ajax({type:"POST",url:window.nps.web_base_url+"/login/verify",data:$(this).serializeArray(),success:function(res){if(res.status){window.location.href=window.nps.web_base_url+"/index/index";}else{$("#login-error").text(res.msg);}},error:function(){ $("#login-error").text("连接失败，请稍后重试 / Connection failed. Please try again.");},complete:function(){button.prop("disabled",false);}});
+});
+</script>
+</body></html>

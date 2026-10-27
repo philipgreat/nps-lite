@@ -1,0 +1,44 @@
+.idea
+nps
+
+# Go build outputs
+/npc
+/nps.exe
+/npc.exe
+
+# Node.js / VuePress
+node_modules/
+yarn.lock
+pnpm-lock.yaml
+
+# VuePress build artifacts
+docs/.vuepress/.cache/
+docs/.vuepress/.temp/
+docs/.vuepress/dist/
+# VuePress dev runtime
+docs/vuepress-dev.log
+docs/vuepress-dev.err.log
+docs/vuepress-dev.pid
+docs/node_modules/
+docs/yarn.lock
+docs/.vscode
+
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local builds and private runtime state
+/dist/
+/conf/nps.conf
+/conf/npc.conf
+/conf/multi_account.conf
+/conf/*.json
+/conf/*.tmp
+*.log
+*.pid
+*.lock
+admin-credentials*
+crontab*.bak
+backup-*/
+__pycache__/
