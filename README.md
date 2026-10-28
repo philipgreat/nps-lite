@@ -128,3 +128,11 @@ GODEBUG=tlsmlkem=0 ./dist/npc -server=YOUR_SERVER:TLS_PORT -vkey=YOUR_CLIENT_VKE
 ## 上游和许可证
 
 保留上游源码及 GPL-3.0 许可证，见 [LICENSE](LICENSE)。上游介绍见 [README.upstream.md](README.upstream.md)，原中文说明见 [README_zh.md](README_zh.md)。
+
+### 24 小时来源 IP 排名
+
+管理员菜单中的「24 小时 IP 排名」（`/index/ipranking`）按映射端口接受的新建 TCP 连接数降序排列，支持 IPv4 / IPv6 搜索、分页和每 30 秒刷新，并显示窗口内首次及最近连接时间。计数包括失败尝试；HTTP / HTTPS 按 TCP 连接计数，不按请求计数。管理端访问、NPC 控制连接和 UDP 不计入。
+
+数据从首次部署开始采集，按分钟汇总并滚动保留 24 小时，窗口边界误差小于一分钟。运行目录的 `data/ip-connections.json` 每 30 秒原子保存一次，正常退出时也会保存；异常断电可能丢失最后 30 秒的数据。重启后会加载已有统计，未满 24 小时时页面显示提示。统计页面及 JSON 接口仅允许已登录的管理员访问。
+
+验证统计模块：`go test -race ./lib/ipstats`。

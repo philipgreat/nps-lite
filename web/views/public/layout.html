@@ -33,7 +33,7 @@
     <script src="{{.web_base_url}}/static/js/flatpickr.min.js?v={{.version}}"></script>
     <script src="{{.web_base_url}}/static/js/flatpickr-l10n-zh.js?v={{.version}}"></script>
     <!-- Latest compiled and minified Locales -->
-    <script src="{{.web_base_url}}/static/js/language.js?v={{.version}}" type="text/javascript"></script>
+    <script src="{{.web_base_url}}/static/js/language.js?v=ipranking-2" type="text/javascript"></script>
 
 
 </head>
@@ -55,6 +55,11 @@
 
 
 
+                {{if eq true .isAdmin}}
+                <li class="{{if eq "ipranking" .menu}}active{{end}}">
+                    <a href="{{.web_base_url}}/index/ipranking"><i class="fa fa-list-ol fa-lg"></i><span class="nav-label" langtag="ip-ranking"></span></a>
+                </li>
+                {{end}}
                 <li class="{{if eq "client" .menu}}active{{end}}">
                     <a href="{{.web_base_url}}/client/list"><i class="fa fa-desktop fa-lg"></i>
                     <span class="nav-label" langtag="word-client"></span></a>

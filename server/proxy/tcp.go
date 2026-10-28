@@ -4,11 +4,13 @@
 package proxy
 
 import (
+	"ehang.io/nps/lib/ipstats"
 	"errors"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/common"
@@ -38,6 +40,7 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 // 开始
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
+		ipstats.Default.Record(c.RemoteAddr().String(), time.Now())
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
 			logs.Warn("client id %d, task id %d,error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
 			c.Close()

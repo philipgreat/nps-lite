@@ -1147,4 +1147,16 @@
 
 
 	</charts>
+<lang id="ip-ranking"><zh-CN>24 小时 IP 排名</zh-CN><en-US>24-hour IP ranking</en-US></lang>
+<lang id="ip-sources"><zh-CN>来源 IP 数</zh-CN><en-US>Source IPs</en-US></lang>
+<lang id="ip-connections"><zh-CN>连接次数</zh-CN><en-US>Connections</en-US></lang>
+<lang id="ip-scope"><zh-CN>按映射端口新建 TCP 连接计数，包含失败尝试；不包含管理页面、NPC 心跳或 UDP。滚动保留 24 小时，按分钟汇总（边界误差小于 1 分钟），每 30 秒自动刷新。</zh-CN><en-US>Counts new TCP connections to mapped ports, including failed attempts. Excludes admin access, NPC heartbeats and UDP. Rolling 24-hour window in minute buckets (boundary error under one minute); refreshes every 30 seconds.</en-US></lang>
+<lang id="ip-started"><zh-CN>开始采集：</zh-CN><en-US>Collection started:</en-US></lang>
+<lang id="ip-updated"><zh-CN>最近更新：</zh-CN><en-US>Updated:</en-US></lang>
+<lang id="ip-partial"><zh-CN>采集尚未满 24 小时，当前仅显示开始采集以来的数据。</zh-CN><en-US>Collection has not yet covered 24 hours. Only data recorded since collection started is available.</en-US></lang>
+<lang id="ip-error"><zh-CN>加载失败，请刷新重试或重新登录。</zh-CN><en-US>Could not load statistics. Refresh or sign in again.</en-US></lang>
+<lang id="ip-rank"><zh-CN>排名</zh-CN><en-US>Rank</en-US></lang>
+<lang id="ip-count"><zh-CN>连接次数</zh-CN><en-US>Connections</en-US></lang>
+<lang id="ip-first"><zh-CN>窗口内首次连接</zh-CN><en-US>First seen in window</en-US></lang>
+<lang id="ip-last"><zh-CN>最近连接</zh-CN><en-US>Last seen</en-US></lang>
 </content>

@@ -1,5 +1,5 @@
 .idea
-nps
+/nps
 
 # Go build outputs
 /npc
@@ -45,3 +45,6 @@ __pycache__/
 
 # Prebuilt, credential-free client ZIP artifacts (generated locally)
 /client-binaries/
+
+# Rolling source-IP connection statistics
+/data/

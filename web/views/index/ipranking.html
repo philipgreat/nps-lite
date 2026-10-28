@@ -1,0 +1,44 @@
+<div class="wrapper wrapper-content ip-ranking">
+ <div class="row console-stats">
+  <div class="col-6"><section class="ibox"><div class="ibox-title"><h5 langtag="ip-sources"></h5></div><div class="ibox-content"><h1 class="no-margins" id="ip-total">—</h1></div></section></div>
+  <div class="col-6"><section class="ibox"><div class="ibox-title"><h5 langtag="ip-connections"></h5></div><div class="ibox-content"><h1 class="no-margins" id="ip-connections">—</h1></div></section></div>
+ </div>
+ <section class="ibox">
+  <div class="ibox-title"><h5 langtag="ip-ranking"></h5></div>
+  <div class="ibox-content">
+   <p class="text-muted" langtag="ip-scope"></p>
+   <p class="text-muted"><span langtag="ip-started"></span> <time id="ip-started">—</time> · <span langtag="ip-updated"></span> <time id="ip-updated">—</time></p>
+   <div class="alert alert-info" id="ip-partial" langtag="ip-partial" hidden></div>
+   <div class="alert alert-danger" id="ip-error" langtag="ip-error" hidden></div>
+   <table id="table" class="table-striped table-hover"></table>
+  </div>
+ </section>
+</div>
+<script>
+(function () {
+ var offset = 0;
+ function date(value) { return value ? new Date(value).toLocaleString() : '—'; }
+ $('#table').bootstrapTable({
+  url: '{{.web_base_url}}/index/ipranking', method: 'get', sidePagination: 'server', pagination: true,
+  pageSize: 25, pageList: [25, 50, 100], search: true, showRefresh: true, escape: false,
+  queryParams: function (p) { offset = p.offset; return {data: 1, offset:p.offset, limit:p.limit, search:p.search}; },
+  responseHandler: function (data) {
+   $('#ip-total').text(data.total.toLocaleString()); $('#ip-connections').text(data.connections.toLocaleString());
+   $('#ip-started').text(date(data.started)); $('#ip-updated').text(date(data.updated));
+   $('#ip-partial').prop('hidden',new Date(data.started) <= new Date(data.window_start));
+   $('#ip-error').prop('hidden',true);
+   return data;
+  },
+  onLoadError: function () { $('#ip-error').prop('hidden',false); },
+  onPostBody: function () { if (languages && languages.content) $('body').setLang('#table'); },
+  columns: [
+   {title:'<span langtag="ip-rank">#</span>', formatter:function(v,r,i) {return offset+i+1;}},
+   {field:'ip', title:'IP', cellStyle:function(){return {css:{'font-family':'monospace','white-space':'nowrap'}};}},
+   {field:'count', title:'<span langtag="ip-count">Connections</span>'},
+   {field:'first', title:'<span langtag="ip-first">First seen</span>', formatter:date},
+   {field:'last', title:'<span langtag="ip-last">Last seen</span>', formatter:date}
+  ]
+ });
+ setInterval(function () { if (!document.hidden) $('#table').bootstrapTable('refresh', {silent:true}); },30000);
+})();
+</script>

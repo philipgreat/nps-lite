@@ -9,6 +9,7 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/goroutine"
+	"ehang.io/nps/lib/ipstats"
 	"ehang.io/nps/server/connection"
 	"ehang.io/nps/web"
 	"encoding/json"
@@ -70,7 +71,7 @@ func (s *httpServer) Start() error {
 				logs.Error(err)
 				os.Exit(0)
 			}
-			err = s.httpServer.Serve(l)
+			err = s.httpServer.Serve(ipstats.Listener(l))
 			if err != nil {
 				logs.Error(err)
 				os.Exit(0)
@@ -85,7 +86,7 @@ func (s *httpServer) Start() error {
 				logs.Error(err)
 				os.Exit(0)
 			}
-			logs.Error(NewHttpsServer(s.httpsListener, s.bridge, s.useCache, s.cacheLen).Start())
+			logs.Error(NewHttpsServer(ipstats.Listener(s.httpsListener), s.bridge, s.useCache, s.cacheLen).Start())
 		}()
 	}
 	return nil
