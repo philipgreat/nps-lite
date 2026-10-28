@@ -34,6 +34,45 @@ Windows 命令行客户端：
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o dist/npc.exe ./cmd/npc/npc.go
 ```
 
+## 在客户端详情中下载配置好的安装包
+
+展开客户端列表中的详情，选择 **Windows / macOS / Linux** 和 **AMD64 / ARM64**，点击“下载 ZIP 安装包”。所有选项均为 64 位，默认启用 TLS。
+
+先在本地预编译六个客户端（需要 Python 3 和 Go，目标服务器无需编译）：
+
+```sh
+python3 scripts/build-npc-packages.py
+```
+
+`dist/client-binaries/` 中生成六个通用 ZIP 和 `manifest.json`。这些通用包只包含二进制，不包含任何客户端 Key。将整个目录复制到 NPS 配置目录下的 `client-binaries/`，或通过 `client_package_dir` 指定绝对路径。
+
+在服务端 `conf/nps.conf` 设置公开的 **TLS 桥接地址**（不是 Web 管理页面的 HTTPS 端口）：
+
+```ini
+client_package_server=remote-access.example.com:8025
+# 可选；默认是 conf_path 下的 client-binaries/
+#client_package_dir=/srv/nps/client-binaries
+```
+
+![客户端安装包下载面板](docs/images/client-package-panel.png)
+
+安装包功能需要升级 NPS 服务端并重启。ZIP 下载地址为 `/client/downloadpackage?id=CLIENT_ID&platform=windows&arch=amd64`，仅允许已登录管理员或该客户端自己的登录账号访问；未登录、退出登录或访问其他客户端均不能取得安装包。返回内容禁止缓存，URL 和文件名不包含 Key。
+
+动态生成的 ZIP 包含：
+
+- `npc.exe` 或 `npc`：对应平台和架构的预编译客户端，包含队列高 CPU 修复。
+- `connection.json`：该客户端当前 VKey、该 NPS 实例的公开 TLS 地址和 `tls_enable=true`。
+- `start.bat`（Windows）、`start.command`（macOS）或 `start.sh`（Linux）。
+- `README.txt`：运行说明。
+
+解压到同一目录后运行启动脚本即可。脚本在前台运行，不自动注册系统服务；macOS 如提示软件安全确认，使用系统正常确认流程。Key 通过 JSON 配置读取，不插入 Shell / BAT 命令，包含特殊字符也不会变成脚本命令。`-connection_profile` 使用已有客户端连接方式，不依赖客户端的“允许配置文件连接”选项。
+
+服务器通过流式 ZIP 复制直接复用预压缩二进制，只动态加入小配置文件，不重新编译或压缩整个客户端。请仅将包含 VKey 的安装包交给对应客户端；已下载的 ZIP 不会随以后修改 Key 或服务器地址自动更新。
+
+```sh
+go test -race ./lib/clientpackage ./web/controllers -run '^TestClientPackage'
+```
+
 界面模板和静态文件通过 `go:embed` 嵌入程序。修改 `web/views/` 或 `web/static/` 后，需要重新编译并替换服务端二进制；仅复制 HTML / CSS 到服务器不会生效。
 
 `lib/nps_mux` 的部分上游测试依赖 Docker、特定网络地址和流量控制工具，队列修复的独立回归测试使用上面的 `-run` 命令。

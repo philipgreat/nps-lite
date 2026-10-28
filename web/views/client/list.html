@@ -90,6 +90,7 @@
                 + '<b langtag="word-tlsquicklycommand"></b>: <span>' + encodeToBase64(row.Remark +'|'+'{{.ip}}:{{.tls_p}}|' + row.VerifyKey + '|true')   + '</span>&emsp;<button class="copy btn btn-info btn-xs" onclick="copyCommand(this)" data-clipboard-text="">复制</button><br/>'
                 + '<b langtag="word-commandclient"></b>: ' + "<code>{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.VerifyKey + " -type=" +{{.bridgeType}} +"</code><button class=\"copy btn btn-info btn-xs\" onclick=\"copyCommand(this)\" data-clipboard-text=\"\">复制</button><br/>"
                 + '<b langtag="word-commandclient-tls"></b>: ' + "<code>{{.win}} -server={{.ip}}:{{.tls_p}} -vkey=" + row.VerifyKey + " -tls_enable=true</code><button class=\"copy btn btn-info btn-xs\" onclick=\"copyCommand(this)\" data-clipboard-text=\"\">复制</button>"
+                + npcPackagePanel(row.Id)
         },
         //表格的列
         columns: [
@@ -271,4 +272,18 @@
     });
 
 
+</script>
+
+<script>
+function npcPackagePanel(id) {
+    var clientId = parseInt(id,10);
+    if (!Number.isSafeInteger(clientId) || clientId<=0) return '';
+    return '<section class="npc-package-panel"><div><strong langtag="package-title">下载客户端安装包</strong><p langtag="package-description">包含二进制、当前客户端 Key 和 TLS 连接配置。</p></div>'
+      + '<form method="get" action="{{.web_base_url}}/client/downloadpackage" class="npc-package-form">'
+      + '<input type="hidden" name="id" value="'+clientId+'">'
+      + '<label><span langtag="package-platform">操作系统</span><select class="form-control" name="platform" aria-label="Operating system"><option value="windows">Windows</option><option value="darwin">macOS</option><option value="linux">Linux</option></select></label>'
+      + '<label><span langtag="package-architecture">CPU 架构</span><select class="form-control" name="arch" aria-label="CPU architecture"><option value="amd64">AMD64 / x86-64</option><option value="arm64">ARM64 / AArch64</option></select></label>'
+      + '<button type="submit" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> <span langtag="package-download">下载 ZIP 安装包</span></button></form>'
+      + '<small><span langtag="package-tls">TLS 默认开启 · 仅支持 64 位 · 远程地址</span>: <span>{{.package_server}}</span></small></section>';
+}
 </script>

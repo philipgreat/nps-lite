@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"ehang.io/nps/lib/clientpackage"
 	"ehang.io/nps/lib/crypt"
 	"flag"
 	"fmt"
@@ -25,29 +26,43 @@ import (
 )
 
 var (
-	serverAddr     = flag.String("server", "", "Server addr (ip:port)")
-	configPath     = flag.String("config", "", "Configuration file path")
-	verifyKey      = flag.String("vkey", "", "Authentication key")
-	logType        = flag.String("log", "stdout", "Log output mode（stdout|file）")
-	connType       = flag.String("type", "tcp", "Connection type with the server（kcp|tcp）")
-	proxyUrl       = flag.String("proxy", "", "proxy socks5 url(eg:socks5://111:222@127.0.0.1:9007)")
-	logLevel       = flag.String("log_level", "7", "log level 0~7")
-	registerTime   = flag.Int("time", 2, "register time long /h")
-	localPort      = flag.Int("local_port", 2000, "p2p local port")
-	password       = flag.String("password", "", "p2p password flag")
-	target         = flag.String("target", "", "p2p target")
-	localType      = flag.String("local_type", "p2p", "p2p target")
-	logPath        = flag.String("log_path", "", "npc log path")
-	debug          = flag.Bool("debug", true, "npc debug")
-	pprofAddr      = flag.String("pprof", "", "PProf debug addr (ip:port)")
-	stunAddr       = flag.String("stun_addr", "stun.stunprotocol.org:3478", "stun server address (eg:stun.stunprotocol.org:3478)")
-	ver            = flag.Bool("version", false, "show current version")
-	disconnectTime = flag.Int("disconnect_timeout", 60, "not receiving check packet times, until timeout will disconnect the client")
-	tlsEnable      = flag.Bool("tls_enable", false, "enable tls")
+	connectionProfile = flag.String("connection_profile", "", "Per-client JSON connection profile")
+	serverAddr        = flag.String("server", "", "Server addr (ip:port)")
+	configPath        = flag.String("config", "", "Configuration file path")
+	verifyKey         = flag.String("vkey", "", "Authentication key")
+	logType           = flag.String("log", "stdout", "Log output mode（stdout|file）")
+	connType          = flag.String("type", "tcp", "Connection type with the server（kcp|tcp）")
+	proxyUrl          = flag.String("proxy", "", "proxy socks5 url(eg:socks5://111:222@127.0.0.1:9007)")
+	logLevel          = flag.String("log_level", "7", "log level 0~7")
+	registerTime      = flag.Int("time", 2, "register time long /h")
+	localPort         = flag.Int("local_port", 2000, "p2p local port")
+	password          = flag.String("password", "", "p2p password flag")
+	target            = flag.String("target", "", "p2p target")
+	localType         = flag.String("local_type", "p2p", "p2p target")
+	logPath           = flag.String("log_path", "", "npc log path")
+	debug             = flag.Bool("debug", true, "npc debug")
+	pprofAddr         = flag.String("pprof", "", "PProf debug addr (ip:port)")
+	stunAddr          = flag.String("stun_addr", "stun.stunprotocol.org:3478", "stun server address (eg:stun.stunprotocol.org:3478)")
+	ver               = flag.Bool("version", false, "show current version")
+	disconnectTime    = flag.Int("disconnect_timeout", 60, "not receiving check packet times, until timeout will disconnect the client")
+	tlsEnable         = flag.Bool("tls_enable", false, "enable tls")
 )
 
 func main() {
 	flag.Parse()
+	if *connectionProfile != "" {
+		if *configPath != "" || *serverAddr != "" || *verifyKey != "" {
+			fmt.Fprintln(os.Stderr, "connection_profile cannot be combined with config, server or vkey flags")
+			os.Exit(1)
+		}
+		profile, err := clientpackage.ReadProfile(*connectionProfile)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Cannot load connection profile:", err)
+			os.Exit(1)
+		}
+		*serverAddr, *verifyKey, *tlsEnable = profile.ServerAddr, profile.VKey, profile.TLSEnable
+	}
+
 	logs.Reset()
 	logs.EnableFuncCallDepth(true)
 	logs.SetLogFuncCallDepth(3)
@@ -240,7 +255,10 @@ func run() {
 		client.SetTlsEnable(*tlsEnable)
 		logs.Info("the version of client is %s, the core version of client is %s,tls enable is %t", version.VERSION, version.GetVersion(), client.GetTlsEnable())
 
-		vkeys := strings.Split(*verifyKey, `,`)
+		vkeys := []string{*verifyKey}
+		if *connectionProfile == "" {
+			vkeys = strings.Split(*verifyKey, `,`)
+		}
 		for _, key := range vkeys {
 			key := key
 			go func() {

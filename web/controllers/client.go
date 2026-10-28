@@ -19,6 +19,7 @@ func (s *ClientController) List() {
 	if s.Ctx.Request.Method == "GET" {
 		s.Data["menu"] = "client"
 		s.SetInfo("client")
+		s.Data["package_server"] = beego.AppConfig.String("client_package_server")
 		s.display("client/list")
 		return
 	}

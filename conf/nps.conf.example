@@ -93,3 +93,8 @@ open_captcha=false
 # 是否开启tls
 tls_enable=true
 tls_bridge_port=8025
+
+# Per-client download packages: public TLS bridge address, not the Web URL.
+client_package_server=remote-access.example.com:8025
+# Default: client-binaries/ under conf_path. Store only the six generic ZIPs here.
+#client_package_dir=/absolute/path/client-binaries

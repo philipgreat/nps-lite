@@ -42,3 +42,6 @@ admin-credentials*
 crontab*.bak
 backup-*/
 __pycache__/
+
+# Prebuilt, credential-free client ZIP artifacts (generated locally)
+/client-binaries/
