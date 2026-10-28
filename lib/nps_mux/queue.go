@@ -210,134 +210,115 @@ func newListElement(buf []byte, l uint16, part bool) (element *listElement, err 
 	return
 }
 
+// receiveWindowQueue serializes publication, removal and byte accounting.
+// Readers and close-time draining may run concurrently; a separate atomic byte
+// counter and lock-free chain can disagree and leave Pop spinning forever.
 type receiveWindowQueue struct {
-	lengthWait uint64
-	chain      *bufChain
-	stopOp     chan struct{}
-	readOp     chan struct{}
-	// https://golang.org/pkg/sync/atomic/#pkg-note-BUG
-	// On non-Linux ARM, the 64-bit functions use instructions unavailable before the ARMv6k core.
-	// On ARM, x86-32, and 32-bit MIPS, it is the caller's responsibility
-	// to arrange for 64-bit alignment of 64-bit words accessed atomically.
-	// The first word in a variable or in an allocated struct, array, or slice can be relied upon to be 64-bit aligned.
-
-	// if there are implicit struct, careful the first word
-	timeout time.Time
+	mu       sync.Mutex
+	elements []*listElement
+	head     int
+	length   uint32
+	stopped  bool
+	changed  chan struct{}
+	timeout  time.Time
 }
 
 func newReceiveWindowQueue() *receiveWindowQueue {
-	queue := receiveWindowQueue{
-		chain:  new(bufChain),
-		stopOp: make(chan struct{}, 2),
-		readOp: make(chan struct{}),
-	}
-	queue.chain.new(64)
-	return &queue
+	return &receiveWindowQueue{elements: make([]*listElement, 0, 64), changed: make(chan struct{})}
 }
 
-func (Self *receiveWindowQueue) Push(element *listElement) {
-	var length, wait uint32
-	for {
-		ptrs := atomic.LoadUint64(&Self.lengthWait)
-		length, wait = Self.chain.head.unpack(ptrs)
-		length += uint32(element.L)
-		if atomic.CompareAndSwapUint64(&Self.lengthWait, ptrs, Self.chain.head.pack(length, 0)) {
-			break
-		}
-		// another goroutine change the length or into wait, make sure
-	}
-	Self.chain.pushHead(unsafe.Pointer(element))
-	if wait == 1 {
-		Self.allowPop()
-	}
-	return
+// notifyLocked broadcasts state changes, including stop and deadline updates.
+func (q *receiveWindowQueue) notifyLocked() {
+	close(q.changed)
+	q.changed = make(chan struct{})
 }
 
-func (Self *receiveWindowQueue) Pop() (element *listElement, err error) {
-	var length uint32
-startPop:
-	ptrs := atomic.LoadUint64(&Self.lengthWait)
-	length, _ = Self.chain.head.unpack(ptrs)
-	if length == 0 {
-		if !atomic.CompareAndSwapUint64(&Self.lengthWait, ptrs, Self.chain.head.pack(0, 1)) {
-			goto startPop // another goroutine is pushing
-		}
-		err = Self.waitPush()
-		// there is no more data in queue, wait for it
-		if err != nil {
-			return
-		}
-		goto startPop // wait finish, trying to Get the New status
-	}
-	// length is not zero, so try to pop
-	for {
-		element = Self.TryPop()
-		if element != nil {
-			return
-		}
-		runtime.Gosched() // another goroutine is still pushing
-	}
+func (q *receiveWindowQueue) Push(element *listElement) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	q.elements = append(q.elements, element)
+	q.length += uint32(element.L)
+	q.notifyLocked()
 }
 
-func (Self *receiveWindowQueue) TryPop() (element *listElement) {
-	ptr, ok := Self.chain.popTail()
-	if ok {
-		element = (*listElement)(ptr)
-		atomic.AddUint64(&Self.lengthWait, ^(uint64(element.L)<<dequeueBits - 1))
-		return
-	}
-	return nil
-}
-
-func (Self *receiveWindowQueue) allowPop() (closed bool) {
-	select {
-	case Self.readOp <- struct{}{}:
-		return false
-	case <-Self.stopOp:
-		return true
-	}
-}
-
-func (Self *receiveWindowQueue) waitPush() (err error) {
-	t := Self.timeout.Sub(time.Now())
-	if t <= 0 {
-		// not Set the timeout, so wait for it without timeout, just like a tcp connection
-		select {
-		case <-Self.readOp:
-			return nil
-		case <-Self.stopOp:
-			err = io.EOF
-			return
-		}
-	}
-	timer := time.NewTimer(t)
-	defer timer.Stop()
-	select {
-	case <-Self.readOp:
+func (q *receiveWindowQueue) popLocked() *listElement {
+	if q.head == len(q.elements) {
 		return nil
-	case <-Self.stopOp:
-		err = io.EOF
-		return
-	case <-timer.C:
-		err = errors.New("mux.queue: read time out")
-		return
+	}
+	element := q.elements[q.head]
+	q.elements[q.head] = nil
+	q.head++
+	q.length -= uint32(element.L)
+	if q.head == len(q.elements) {
+		q.elements = q.elements[:0]
+		q.head = 0
+	} else if q.head >= 64 && q.head*2 >= len(q.elements) {
+		// Reuse consumed slots instead of retaining an ever-growing slice.
+		remaining := copy(q.elements, q.elements[q.head:])
+		clear(q.elements[remaining:])
+		q.elements = q.elements[:remaining]
+		q.head = 0
+	}
+	return element
+}
+
+func (q *receiveWindowQueue) Pop() (*listElement, error) {
+	for {
+		q.mu.Lock()
+		if element := q.popLocked(); element != nil {
+			q.mu.Unlock()
+			return element, nil
+		}
+		if q.stopped {
+			q.mu.Unlock()
+			return nil, io.EOF
+		}
+		changed, deadline := q.changed, q.timeout
+		q.mu.Unlock()
+		if deadline.IsZero() {
+			<-changed
+			continue
+		}
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			return nil, errors.New("mux.queue: read time out")
+		}
+		timer := time.NewTimer(remaining)
+		select {
+		case <-changed:
+			timer.Stop()
+		case <-timer.C:
+			// Recheck the current deadline: it may have been extended concurrently.
+		}
 	}
 }
 
-func (Self *receiveWindowQueue) Len() (n uint32) {
-	ptrs := atomic.LoadUint64(&Self.lengthWait)
-	n, _ = Self.chain.head.unpack(ptrs)
-	// just for unpack method use
-	return
+func (q *receiveWindowQueue) TryPop() *listElement {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.popLocked()
 }
 
-func (Self *receiveWindowQueue) Stop() {
-	Self.stopOp <- struct{}{}
-	Self.stopOp <- struct{}{}
+func (q *receiveWindowQueue) Len() uint32 {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.length
 }
 
-func (Self *receiveWindowQueue) SetTimeOut(t time.Time) {
-	Self.timeout = t
+func (q *receiveWindowQueue) Stop() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	if !q.stopped {
+		q.stopped = true
+		q.notifyLocked()
+	}
+}
+
+func (q *receiveWindowQueue) SetTimeOut(deadline time.Time) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	q.timeout = deadline
+	q.notifyLocked()
 }
 
 // https://golang.org/src/sync/poolqueue.go

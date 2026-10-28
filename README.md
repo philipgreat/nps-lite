@@ -10,6 +10,7 @@
 - 仪表盘将 CPU、内存、负载收进一张资源卡片，使用独立坐标轴；TCP / UDP、上下行速率分别合并展示，累计流量改为数字摘要。
 - 内存图统一使用百分比，修正上游的 MB 单位标注。
 - 增加 VKey 格式、保存与重新加载兼容性测试。
+- 修复复用连接接收队列的高 CPU 忙循环：入队、出队和字节计数在同一锁下更新，空队列阻塞等待，关闭与读超时更新唤醒读者。
 
 ![登录页](docs/images/login-desktop.png)
 
@@ -21,6 +22,7 @@
 
 ```sh
 go test ./lib/crypt ./lib/file
+go test -race ./lib/nps_mux -run '^TestReceiveQueue' -count=10 -timeout=60s
 mkdir -p dist
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o dist/nps ./cmd/nps/nps.go
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o dist/npc ./cmd/npc/npc.go
@@ -33,6 +35,8 @@ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o d
 ```
 
 界面模板和静态文件通过 `go:embed` 嵌入程序。修改 `web/views/` 或 `web/static/` 后，需要重新编译并替换服务端二进制；仅复制 HTML / CSS 到服务器不会生效。
+
+`lib/nps_mux` 的部分上游测试依赖 Docker、特定网络地址和流量控制工具，队列修复的独立回归测试使用上面的 `-run` 命令。
 
 ## 配置和启动
 
