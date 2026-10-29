@@ -63,9 +63,10 @@ client_package_server=remote-access.example.com:8025
 - `npc.exe` 或 `npc`：对应平台和架构的预编译客户端，包含队列高 CPU 修复。
 - `connection.json`：该客户端当前 VKey、该 NPS 实例的公开 TLS 地址和 `tls_enable=true`。
 - `start.bat`（Windows）、`start.command`（macOS）或 `start.sh`（Linux）。
-- `README.txt`：运行说明。
+- `keep-running.bat`（Windows）或 `keep-running.sh`（Linux / macOS）：保持运行脚本，客户端退出后重试。
+- `README.txt`：文件说明、手动启动步骤以及需使用者自行设置的 cron / Windows 任务计划示例。
 
-解压到同一目录后运行启动脚本即可。脚本在前台运行，不自动注册系统服务；macOS 如提示软件安全确认，使用系统正常确认流程。Key 通过 JSON 配置读取，不插入 Shell / BAT 命令，包含特殊字符也不会变成脚本命令。`-connection_profile` 使用已有客户端连接方式，不依赖客户端的“允许配置文件连接”选项。
+客户端详情统一提供 ZIP 下载入口，不再显示快捷编码或手写客户端命令。解压到同一目录后先运行启动脚本确认连接，再按说明自行设置 cron / 任务计划。脚本在前台运行，不自动注册系统服务；macOS 如提示软件安全确认，使用系统正常确认流程。Key 通过 JSON 配置读取，不插入 Shell / BAT 命令，包含特殊字符也不会变成脚本命令。`-connection_profile` 使用已有客户端连接方式，不依赖客户端的“允许配置文件连接”选项。
 
 服务器通过流式 ZIP 复制直接复用预压缩二进制，只动态加入小配置文件，不重新编译或压缩整个客户端。请仅将包含 VKey 的安装包交给对应客户端；已下载的 ZIP 不会随以后修改 Key 或服务器地址自动更新。
 

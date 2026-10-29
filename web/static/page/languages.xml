@@ -942,7 +942,7 @@
 
 	<lang id="console-disabled"><zh-CN>未启用</zh-CN><en-US>Disabled</en-US></lang>
 	<lang id="package-title"><zh-CN>下载客户端安装包</zh-CN><en-US>Download client package</en-US></lang>
-<lang id="package-description"><zh-CN>包含二进制、当前客户端 Key 和 TLS 连接配置。</zh-CN><en-US>Includes the NPC binary, this client’s Key and TLS connection profile.</en-US></lang>
+<lang id="package-description"><zh-CN>包含执行文件、连接配置、启动及保持运行脚本和使用说明；cron 需自行设置。</zh-CN><en-US>Includes the binary, connection profile, startup and keep-running scripts, and instructions. Configure cron yourself.</en-US></lang>
 <lang id="package-platform"><zh-CN>操作系统</zh-CN><en-US>Operating system</en-US></lang>
 <lang id="package-architecture"><zh-CN>CPU 架构</zh-CN><en-US>CPU architecture</en-US></lang>
 <lang id="package-download"><zh-CN>下载 ZIP 安装包</zh-CN><en-US>Download ZIP package</en-US></lang>

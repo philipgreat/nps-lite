@@ -43,8 +43,8 @@ func TestClientPackageSixPlatforms(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(r.File) != 4 {
-					t.Fatalf("expected four package files, got %d", len(r.File))
+				if len(r.File) != 5 {
+					t.Fatalf("expected five package files, got %d", len(r.File))
 				}
 				files := map[string][]byte{}
 				for _, entry := range r.File {
@@ -75,6 +75,16 @@ func TestClientPackageSixPlatforms(t *testing.T) {
 				}
 				if !bytes.Contains(files[startup], []byte("-connection_profile")) || bytes.Contains(files[startup], []byte(profile.VKey)) {
 					t.Fatal("unsafe startup script")
+				}
+				keeper := "keep-running.sh"
+				if platform == "windows" {
+					keeper = "keep-running.bat"
+				}
+				if len(files[keeper]) == 0 || bytes.Contains(files[keeper], []byte(profile.VKey)) {
+					t.Fatal("missing or unsafe supervisor")
+				}
+				if !bytes.Contains(files["README.txt"], []byte("crontab -e")) || !bytes.Contains(files["README.txt"], []byte("Task Scheduler")) {
+					t.Fatal("missing scheduling instructions")
 				}
 				if platform != "windows" && r.File[2].Mode().Perm() != 0755 {
 					t.Fatal("startup script is not executable")

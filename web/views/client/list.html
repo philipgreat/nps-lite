@@ -86,10 +86,6 @@
                 + '<b langtag="word-createtime"></b>: ' + row.CreateTime + '&emsp;<br/>'
                 + '<b langtag="word-lastonlinetime"></b>: ' + row.LastOnlineTime + '&emsp;<br/>'
                 + '<b langtag="word-expiretime"></b>: ' + (row.ExpireTime || '<span langtag="info-unrestricted"></span>') + '&emsp;<br/><br/>'
-                + '<b langtag="word-quicklycommand"></b>: <span>' + encodeToBase64(row.Remark +'|'+'{{.ip}}:{{.p}}|' + row.VerifyKey + '|false')   + '</span>&emsp;<button class="copy btn btn-info btn-xs" onclick="copyCommand(this)" data-clipboard-text="">复制</button><br/>'
-                + '<b langtag="word-tlsquicklycommand"></b>: <span>' + encodeToBase64(row.Remark +'|'+'{{.ip}}:{{.tls_p}}|' + row.VerifyKey + '|true')   + '</span>&emsp;<button class="copy btn btn-info btn-xs" onclick="copyCommand(this)" data-clipboard-text="">复制</button><br/>'
-                + '<b langtag="word-commandclient"></b>: ' + "<code>{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.VerifyKey + " -type=" +{{.bridgeType}} +"</code><button class=\"copy btn btn-info btn-xs\" onclick=\"copyCommand(this)\" data-clipboard-text=\"\">复制</button><br/>"
-                + '<b langtag="word-commandclient-tls"></b>: ' + "<code>{{.win}} -server={{.ip}}:{{.tls_p}} -vkey=" + row.VerifyKey + " -tls_enable=true</code><button class=\"copy btn btn-info btn-xs\" onclick=\"copyCommand(this)\" data-clipboard-text=\"\">复制</button>"
                 + npcPackagePanel(row.Id)
         },
         //表格的列
@@ -250,35 +246,13 @@
         ]
     });
 
-    function encodeToBase64(str){
-        const utf8Str = unescape(encodeURIComponent("nps:"+str));
-        return btoa(utf8Str);
-    }
-
-    function copyCommand(data) {
-        data.setAttribute("data-clipboard-text", data.previousElementSibling.innerHTML)
-    }
-
-    var clipboard = new ClipboardJS('.copy');
-    clipboard.on('success', function (e) {
-        // alert("复制成功"+e.text)
-        toastr.success('复制成功');
-        e.clearSelection();
-    });
-
-    clipboard.on('error', function (e) {
-        // alert("复制失败")
-        toastr.error('复制失败', '提示');
-    });
-
-
 </script>
 
 <script>
 function npcPackagePanel(id) {
     var clientId = parseInt(id,10);
     if (!Number.isSafeInteger(clientId) || clientId<=0) return '';
-    return '<section class="npc-package-panel"><div><strong langtag="package-title">下载客户端安装包</strong><p langtag="package-description">包含二进制、当前客户端 Key 和 TLS 连接配置。</p></div>'
+    return '<section class="npc-package-panel"><div><strong langtag="package-title">下载客户端安装包</strong><p langtag="package-description">包含执行文件、连接配置、启动及保持运行脚本和使用说明；cron 需自行设置。</p></div>'
       + '<form method="get" action="{{.web_base_url}}/client/downloadpackage" class="npc-package-form">'
       + '<input type="hidden" name="id" value="'+clientId+'">'
       + '<label><span langtag="package-platform">操作系统</span><select class="form-control" name="platform" aria-label="Operating system"><option value="windows">Windows</option><option value="darwin">macOS</option><option value="linux">Linux</option></select></label>'
